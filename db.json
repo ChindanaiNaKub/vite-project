@@ -32,6 +32,17 @@
       "time": "11:00",
       "petsAllowed": false,
       "organizer": "Carey Wales"
+    },
+    {
+      "id": 9999999,
+      "category": "education",
+      "title": "Math Workshop",
+      "description": "A workshop to improve math skills.",
+      "location": "Library Hall",
+      "date": "September 1, 2022",
+      "time": "14:00",
+      "petsAllowed": false,
+      "organizer": "Alex Numbers"
     }
   ]
 }
