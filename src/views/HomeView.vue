@@ -41,6 +41,8 @@ const events = ref<Event[]>([
 </script>
 
 <template>
+  <h1>Events for Good</h1>
+  <!--- new element-->
   <div class="events">
     <div v-for="event in events" :key="event.id">
       <EventMeta :category="event.category" :organizer="event.organizer" />
