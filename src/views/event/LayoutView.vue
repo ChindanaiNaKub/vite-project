@@ -16,10 +16,10 @@ onMounted(() => {
   EventService.getEvent((parseInt(props.id))).then(response => {
     event.value = response.data
   }).catch((error) => {
-    if (error.response && error.response.status === 500) {
-      router.push({ name: 'network-error' })
-    } else {
+    if (error.response && error.response.status === 404 ) {
       router.push({ name: '404-resource-view', params: { resource: 'event' } })
+    } else {
+      router.push({ name: 'network-error' })
     }
   })
 });
