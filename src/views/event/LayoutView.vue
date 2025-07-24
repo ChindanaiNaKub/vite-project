@@ -15,8 +15,12 @@ onMounted(() => {
   // fetch event ( by id ) and set local event data
   EventService.getEvent((parseInt(props.id))).then(response => {
     event.value = response.data
-  }).catch(() => {
-    router.push({ name: '404-resource-view', params: { resource: 'event' } })
+  }).catch((error) => {
+    if (error.response && error.response.status === 500) {
+      router.push({ name: 'network-error' })
+    } else {
+      router.push({ name: '404-resource-view', params: { resource: 'event' } })
+    }
   })
 });
 </script>
