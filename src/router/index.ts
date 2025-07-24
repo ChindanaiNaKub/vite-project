@@ -11,6 +11,13 @@ const router = createRouter({
       path: '/',
       name: 'event-list-view',
       component: EventListView,
+      props: route => {
+        let page = Number(route.query.page)
+        if (!page || isNaN(page) || page < 1) page = 1
+        let pageSize = Number(route.query.pageSize)
+        if (!pageSize || isNaN(pageSize) || pageSize < 1) pageSize = 2
+        return { page, pageSize }
+      },
     },
     {
       path: '/event/:id',
