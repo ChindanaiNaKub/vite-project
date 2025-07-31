@@ -68,7 +68,7 @@ function onPageSizeChange(e: Event) {
       <option v-for="size in [2, 3, 4, 6]" :key="size" :value="size">{{ size }}</option>
     </select>
   </div>
-  <div class="events">
+  <div class="flex flex-col items-center">
     <div v-for="event in events" :key="event.id">
       <EventMeta :category="event.category" :organizer="event.organizer" />
       <EventCard :event="event" />
@@ -93,11 +93,6 @@ function onPageSizeChange(e: Event) {
 </template>
 
 <style scoped>
-.events {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
 .pagination {
   display: flex;
   width: 290px;
