@@ -1,39 +1,33 @@
-# vite-project
+Lab 5
 
-This template should help get you started developing with Vue 3 in Vite.
+### 3.3
+App.vue
+<div id="text-center font-sans text-gray-700 antialias">
+text-center - Centers text horizontally within the element
+font-sans - Applies a sans-serif font family (system default)
+text-gray-700 - Sets text color to a medium gray shade
+antialias - Applies font smoothing for better text rendering
 
-## Recommended IDE Setup
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+EventlistView.vue
+<div class="flex flex-col items-center">
+flex - Makes the element a flexbox container
+flex-col - Sets flex direction to column (vertical stacking)
+items-center - Centers flex items along the cross-axis (horizontally in this case)
 
-## Type Support for `.vue` Imports in TS
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+### 5
+<div class="cursor-pointer border border-gray-600 p-4 w-64 mb-6 hover:scale-101 hover:shadow-sp">
+cursor-pointer: เมื่อชี้เมาส์ไปที่กล่อง เมาส์จะเปลี่ยนเป็นรูปมือ (เหมือนกำลังชี้) บอกว่าคลิกได้
 
-## Customize configuration
+border border-gray-600: มีเส้นขอบสีเทาเข้มรอบๆ กล่อง
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+p-4: มีช่องว่างด้านใน (padding) รอบๆ ข้อความหรือเนื้อหา 4 หน่วย
 
-## Project Setup
+w-64: กำหนดความกว้างของกล่องไว้ที่ 64 หน่วย
 
-```sh
-npm install
-```
+mb-6: มีช่องว่างด้านล่าง (margin-bottom) 6 หน่วย ทำให้มีระยะห่างจากองค์ประกอบถัดไป
 
-### Compile and Hot-Reload for Development
+hover:scale-101: เมื่อเอาเมาส์ไปชี้ กล่องจะขยายใหญ่ขึ้นเล็กน้อย (101% ของขนาดเดิม)
 
-```sh
-npm run dev
-```
-
-### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+hover:shadow-sp: เมื่อเอาเมาส์ไปชี้ กล่องจะมีเงาขึ้นมา ซึ่ง shadow-sp นี้เป็นเงาแบบพิเศษที่ผู้สร้างโค้ดกำหนดขึ้นมาเองครับ
