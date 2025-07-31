@@ -63,7 +63,7 @@ function onPageSizeChange(e: Event) {
   </div>
   <div class="flex flex-col items-center">
     <div v-for="event in events" :key="event.id">
-      <EventMeta :category="event.category" :organizer="event.organizer" />
+      <!-- <EventMeta :category="event.category" :organizer="event.organizer" /> -->
       <EventCard :event="event" />
     </div>
   </div>
