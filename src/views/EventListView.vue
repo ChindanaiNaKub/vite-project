@@ -12,7 +12,7 @@ const events = ref<EventType[] | null>(null)
 const totalEvents = ref(0)
 const hasNextPage = computed(() => {
   //const totalPages = Math.ceil(totalEvents.value / pageSize.value)
-  const totalPages = Math.ceil(totalEvents.value / 3)
+  const totalPages = Math.ceil(totalEvents.value / pageSize.value)
 
   return page.value < totalPages
 })
@@ -34,7 +34,7 @@ const router = useRouter()
 onMounted(() => {
   watchEffect(() => {
     //EventService.getEvents(pageSize.value, page.value)
-    EventService.getEvents(3, page.value)
+    EventService.getEvents(pageSize.value, page.value)
       .then((response) => {
         events.value = response.data
         totalEvents.value = response.headers['x-total-count']
@@ -43,13 +43,6 @@ onMounted(() => {
         console.error('There was an error!', error)
       })
   })
-  StudentService.getStudents()
-    .then((response) => {
-      students.value = response.data
-    })
-    .catch((error) => {
-      console.error('There was an error!', error)
-    })
 })
 
 function onPageSizeChange(e: Event) {
@@ -87,9 +80,6 @@ function onPageSizeChange(e: Event) {
     v-if="hasNextPage"
     >Next Page</RouterLink
   >
-  <div class="students">
-    <StudentCard v-for="student in students" :key="student.id" :student="student" />
-  </div>
 </template>
 
 <style scoped>
