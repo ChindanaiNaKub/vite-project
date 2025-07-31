@@ -7,18 +7,12 @@ defineProps<{
 </script>
 
 <template>
-  <div class="student-card">
-    <h2>{{ name }} {{ surname }}</h2>
-    <p>GPA: {{ gpa }}</p>
+  <div class="border border-gray-600 p-4 mb-4 w-80 text-center">
+    <h2 class="text-xl font-semibold mb-2">{{ name }} {{ surname }}</h2>
+    <p class="text-gray-600">GPA: {{ gpa }}</p>
   </div>
 </template>
 
 <style scoped>
-.student-card {
-  border: 1px solid #39495c;
-  padding: 16px;
-  margin-bottom: 16px;
-  width: 300px;
-  text-align: center;
-}
+/* All styles converted to Tailwind classes */
 </style>

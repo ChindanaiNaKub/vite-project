@@ -7,15 +7,16 @@ const { message } = storeToRefs(store)
 </script>
 
 <template>
-  <div id="text-center font-sans text-gray-700 antialias">
+  <div class="text-center font-sans text-gray-700 antialiased">
     <header>
-      <div id="flashMessage" class="animate-fade" v-if="message">
-        <h4>{{ message }}</h4>
+      <div id="flashMessage" class="animate-pulse bg-yellow-200 p-4 mb-4" v-if="message">
+        <h4 class="text-lg font-semibold">{{ message }}</h4>
       </div>
       <div class="wrapper">
-        <nav class="py-6">
-          <RouterLink class="font-bold text-gray-700" exact-active-class="text-green-500" :to="{ name: 'event-list-view' }">Event</RouterLink> |
-          <RouterLink class="font-bold text-gray-700" exact-active-class="text-green-500" :to="{ name: 'about' }">About</RouterLink>
+        <nav class="py-6 px-8">
+          <RouterLink class="font-bold text-gray-700 hover:text-green-600 transition-colors mx-2" exact-active-class="text-green-500 underline" :to="{ name: 'event-list-view' }">Event</RouterLink>
+          <span class="text-gray-400 mx-2">|</span>
+          <RouterLink class="font-bold text-gray-700 hover:text-green-600 transition-colors mx-2" exact-active-class="text-green-500 underline" :to="{ name: 'about' }">About</RouterLink>
         </nav>
       </div>
     </header>
@@ -24,31 +25,12 @@ const { message } = storeToRefs(store)
 </template>
 
 <style>
-nav {
-  padding: 30px;
-  font-weight: bold;
-  color: #2c3e50;
-}
-nav a {
-  color: #2c3e50;
-  text-decoration: none;
-  margin: 0 5px;
-  transition: color 0.2s;
-}
-nav a.router-link-exact-active {
-  color: #42b983;
-  text-decoration: underline;
-}
-nav a:hover {
-  color: #005a3c;
-}
-.nav-separator {
-  margin: 0 8px;
-  color: #888;
-}
+/* Global styles that can't be easily converted to Tailwind */
 h2 {
   font-size: 20px;
 }
+
+/* Flash message animation */
 @keyframes yellofade {
   from {
     background-color: yellow;
@@ -57,6 +39,7 @@ h2 {
     background-color: transparent;
   }
 }
+
 #flashMessage {
   animation: yellofade 3s ease-in-out;
 }

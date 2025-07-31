@@ -23,6 +23,11 @@ function handleEdit() {
 </script>
 
 <template>
-  <p>Edit event here</p>
-  <button @click="handleEdit">Edit</button>
+  <div class="max-w-2xl mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6">Edit Event</h1>
+    <p class="text-gray-600 mb-4">Edit event here</p>
+    <button @click="handleEdit" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded transition-colors">
+      Edit
+    </button>
+  </div>
 </template>

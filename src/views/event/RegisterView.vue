@@ -21,6 +21,11 @@ const register = () => {
 </script>
 
 <template>
-  <p>Register event here</p>
-  <button @click="register">Register</button>
+  <div class="max-w-2xl mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6">Register for Event</h1>
+    <p class="text-gray-600 mb-4">Register event here</p>
+    <button @click="register" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded transition-colors">
+      Register
+    </button>
+  </div>
 </template>

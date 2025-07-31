@@ -53,11 +53,11 @@ function onPageSizeChange(e: Event) {
 </script>
 
 <template>
-  <h1>Events for Good</h1>
+  <h1 class="text-3xl font-bold mb-6">Events for Good</h1>
   <!-- Page size selector -->
-  <div style="margin-bottom: 1em">
-    <label for="page-size-select">Events per page: </label>
-    <select id="page-size-select" :value="pageSize" @change="onPageSizeChange($event)">
+  <div class="mb-4">
+    <label for="page-size-select" class="mr-2">Events per page: </label>
+    <select id="page-size-select" :value="pageSize" @change="onPageSizeChange($event)" class="border border-gray-300 rounded px-2 py-1">
       <option v-for="size in [2, 3, 4, 6]" :key="size" :value="size">{{ size }}</option>
     </select>
   </div>
@@ -67,35 +67,24 @@ function onPageSizeChange(e: Event) {
       <EventCard :event="event" />
     </div>
   </div>
-  <div class="pagination"></div>
-  <RouterLink
-    :to="{ name: 'event-list-view', query: { page: page - 1, pageSize: pageSize } }"
-    rel="prev"
-    v-if="page != 1"
-    >Prev Page</RouterLink
-  >
-  <RouterLink
-    :to="{ name: 'event-list-view', query: { page: page + 1, pageSize: pageSize } }"
-    rel="next"
-    v-if="hasNextPage"
-    >Next Page</RouterLink
-  >
+  <div class="flex w-72 mt-6">
+    <RouterLink
+      :to="{ name: 'event-list-view', query: { page: page - 1, pageSize: pageSize } }"
+      rel="prev"
+      v-if="page != 1"
+      class="flex-1 no-underline text-gray-700 text-left hover:text-green-600 transition-colors"
+      >Prev Page</RouterLink
+    >
+    <RouterLink
+      :to="{ name: 'event-list-view', query: { page: page + 1, pageSize: pageSize } }"
+      rel="next"
+      v-if="hasNextPage"
+      class="flex-1 no-underline text-gray-700 text-right hover:text-green-600 transition-colors"
+      >Next Page</RouterLink
+    >
+  </div>
 </template>
 
 <style scoped>
-.pagination {
-  display: flex;
-  width: 290px;
-}
-.pagination a {
-  flex: 1;
-  text-decoration: none;
-  color: #2c3e50;
-}
-#page-prev {
-  text-align: left;
-}
-#page-next {
-  text-align: right;
-}
+/* All styles converted to Tailwind classes */
 </style>
