@@ -22,7 +22,7 @@ const props = defineProps({
   pageSize: {
     type: Number,
     required: true,
-  }
+  },
 })
 const page = computed(() => props.page)
 const pageSize = computed(() => props.pageSize)
@@ -55,19 +55,14 @@ function onPageSizeChange(e: Event) {
   const newSize = Number(target.value)
   router.push({ name: 'event-list-view', query: { page: 1, pageSize: newSize } })
 }
-
 </script>
 
 <template>
   <h1>Events for Good</h1>
   <!-- Page size selector -->
-  <div style="margin-bottom: 1em;">
+  <div style="margin-bottom: 1em">
     <label for="page-size-select">Events per page: </label>
-    <select
-      id="page-size-select"
-      :value="pageSize"
-      @change="onPageSizeChange($event)"
-    >
+    <select id="page-size-select" :value="pageSize" @change="onPageSizeChange($event)">
       <option v-for="size in [2, 3, 4, 6]" :key="size" :value="size">{{ size }}</option>
     </select>
   </div>
@@ -78,8 +73,18 @@ function onPageSizeChange(e: Event) {
     </div>
   </div>
   <div class="pagination"></div>
-  <RouterLink :to="{name: 'event-list-view', query: {page: page - 1, pageSize: pageSize}}" rel="prev" v-if="page != 1">Prev Page</RouterLink>
-  <RouterLink :to="{name: 'event-list-view', query: {page: page + 1, pageSize: pageSize}}" rel="next" v-if="hasNextPage">Next Page</RouterLink>
+  <RouterLink
+    :to="{ name: 'event-list-view', query: { page: page - 1, pageSize: pageSize } }"
+    rel="prev"
+    v-if="page != 1"
+    >Prev Page</RouterLink
+  >
+  <RouterLink
+    :to="{ name: 'event-list-view', query: { page: page + 1, pageSize: pageSize } }"
+    rel="next"
+    v-if="hasNextPage"
+    >Next Page</RouterLink
+  >
   <div class="students">
     <StudentCard v-for="student in students" :key="student.id" :student="student" />
   </div>
