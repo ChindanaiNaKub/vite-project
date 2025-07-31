@@ -1,21 +1,26 @@
 <script lang="ts" setup>
-import { toRefs } from 'vue';
-import  { type Event } from '@/types'
+import { toRefs } from 'vue'
+import { type Event } from '@/types'
 import { useRouter } from 'vue-router'
+import { useMessageStore } from '@/stores/message'
+
 const props = defineProps<{
-    event: Event
-    id: string
+  event: Event
+  id: string
 }>()
 const { event } = toRefs(props)
 const router = useRouter()
+const store = useMessageStore()
 const register = () => {
-    // if regis api call successful
-    // push back to the event details view
-    router.push({ name: 'event-detail-view'})
+  store.updateMessage('You are successfully registered for ' + props.event.title)
+  setTimeout(() => {
+    store.restMessage()
+  }, 3000)
+  router.push({ name: 'event-detail-view', params: { id: props.id } })
 }
 </script>
 
 <template>
- <p>Register event here</p>
- <button @click="register">Register</button>
+  <p>Register event here</p>
+  <button @click="register">Register</button>
 </template>
