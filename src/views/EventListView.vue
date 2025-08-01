@@ -67,7 +67,7 @@ function onPageSizeChange(e: Event) {
       <EventCard :event="event" />
     </div>
   </div>
-  <div class="flex w-72 mt-6">
+  <div class="flex w-72 mt-6 mx-auto">
     <RouterLink
       :to="{ name: 'event-list-view', query: { page: page - 1, pageSize: pageSize } }"
       rel="prev"
