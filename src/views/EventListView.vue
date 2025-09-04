@@ -33,11 +33,19 @@ const router = useRouter()
 
 onMounted(() => {
   watchEffect(() => {
-    //EventService.getEvents(pageSize.value, page.value)
     EventService.getEvents(pageSize.value, page.value)
       .then((response) => {
         events.value = response.data
-        totalEvents.value = response.headers['x-total-count']
+        // Debug: log all headers to see what's available
+        console.log('All response headers:', response.headers)
+        
+        // Get total count from the header (try both variations)
+        const totalCount = response.headers['x-total-count'] || 
+                          response.headers['X-Total-Count'] ||
+                          response.headers['X-TOTAL-COUNT'] ||
+                          0
+        totalEvents.value = Number(totalCount)
+        console.log('Page:', page.value, 'Events loaded:', events.value?.length || 0, 'Total events:', totalEvents.value)
       })
       .catch((error) => {
         console.error('There was an error!', error)
