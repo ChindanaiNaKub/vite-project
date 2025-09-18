@@ -13,6 +13,7 @@ import { useEventStore } from '@/stores/event'
 import AddEventView from '@/views/event/EventFormView.vue'
 import OrganizationFormView from '@/views/OrganizationFormView.vue'
 import OrganizationListView from '@/views/OrganizationListView.vue'
+import AuctionListView from '@/views/AuctionListView.vue'
 
 
 const router = createRouter({
@@ -29,6 +30,11 @@ const router = createRouter({
         if (!pageSize || isNaN(pageSize) || pageSize < 1) pageSize = 2
         return { page, pageSize }
       },
+    },
+    {
+      path: '/auctions',
+      name: 'auction-list',
+      component: AuctionListView
     },
     {
       path: '/event/:id',
