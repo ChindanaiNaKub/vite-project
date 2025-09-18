@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import EventCard from '@/components/EventCard.vue'
 import EventMeta from '@/components/EventMeta.vue'
+import BaseInput from '@/components/BaseInput.vue'
 import type { Event as EventType } from '@/types'
 import type { Student } from '@/type/Student'
 import { ref, onMounted, computed, watchEffect } from 'vue'
@@ -10,6 +11,7 @@ import { useRouter } from 'vue-router'
 
 const events = ref<EventType[] | null>(null)
 const totalEvents = ref(0)
+const keyword = ref('')
 const hasNextPage = computed(() => {
   //const totalPages = Math.ceil(totalEvents.value / pageSize.value)
   const totalPages = Math.ceil(totalEvents.value / pageSize.value)
@@ -31,25 +33,26 @@ const pageSize = computed(() => props.pageSize)
 const students = ref<Student[]>([])
 const router = useRouter()
 
+function updateKeyword(value: string) {
+  let queryFunction;
+  if (keyword.value === '') {
+    queryFunction = EventService.getEvents(pageSize.value, page.value)
+  } else {
+    queryFunction = EventService.getEventsByKeyword(keyword.value, pageSize.value, page.value)
+  }
+  queryFunction.then((response) => {
+    events.value = response.data
+    console.log('events', events.value)
+    totalEvents.value = Number(response.headers['x-total-count'] || response.headers['X-Total-Count'] || 0)
+    console.log('totalEvent', totalEvents.value)
+  }).catch(() => {
+    router.push({ name: 'NetworkError' })
+  })
+}
+
 onMounted(() => {
   watchEffect(() => {
-    EventService.getEvents(pageSize.value, page.value)
-      .then((response) => {
-        events.value = response.data
-        // Debug: log all headers to see what's available
-        console.log('All response headers:', response.headers)
-        
-        // Get total count from the header (try both variations)
-        const totalCount = response.headers['x-total-count'] || 
-                          response.headers['X-Total-Count'] ||
-                          response.headers['X-TOTAL-COUNT'] ||
-                          0
-        totalEvents.value = Number(totalCount)
-        console.log('Page:', page.value, 'Events loaded:', events.value?.length || 0, 'Total events:', totalEvents.value)
-      })
-      .catch((error) => {
-        console.error('There was an error!', error)
-      })
+    updateKeyword(keyword.value)
   })
 })
 
@@ -61,20 +64,30 @@ function onPageSizeChange(e: Event) {
 </script>
 
 <template>
-  <h1 class="text-3xl font-bold mb-6">Events for Good</h1>
-  <!-- Page size selector -->
-  <div class="mb-4">
-    <label for="page-size-select" class="mr-2">Events per page: </label>
-    <select id="page-size-select" :value="pageSize" @change="onPageSizeChange($event)" class="border border-gray-300 rounded px-2 py-1">
-      <option v-for="size in [2, 3, 4, 6]" :key="size" :value="size">{{ size }}</option>
-    </select>
-  </div>
-  <div class="flex flex-col items-center">
-    <div v-for="event in events" :key="event.id">
-      <!-- <EventMeta :category="event.category" :organizer="event.organizer" /> -->
-      <EventCard :event="event" />
+  <h1 class="text-3xl font-bold mb-6">Events For Good</h1>
+  <main class="flex flex-col items-center">
+    <div class="w-64 mb-4">
+      <BaseInput
+        v-model="keyword"
+        type="text"
+        label="Search..."
+        @input="updateKeyword"
+        class="w-full"/>
     </div>
-  </div>
+    <!-- Page size selector -->
+    <div class="mb-4">
+      <label for="page-size-select" class="mr-2">Events per page: </label>
+      <select id="page-size-select" :value="pageSize" @change="onPageSizeChange($event)" class="border border-gray-300 rounded px-2 py-1">
+        <option v-for="size in [2, 3, 4, 6]" :key="size" :value="size">{{ size }}</option>
+      </select>
+    </div>
+    <div class="flex flex-col items-center">
+      <div v-for="event in events" :key="event.id">
+        <!-- <EventMeta :category="event.category" :organizer="event.organizer" /> -->
+        <EventCard :event="event" />
+      </div>
+    </div>
+  </main>
   <div class="flex w-72 mt-6 mx-auto">
     <RouterLink
       :to="{ name: 'event-list-view', query: { page: page - 1, pageSize: pageSize } }"

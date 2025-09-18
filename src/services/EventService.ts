@@ -19,5 +19,14 @@ export default {
     // Remove the ID field as the backend will generate it
     const { id, ...eventWithoutId } = event;
     return apiClient.post('/events', eventWithoutId)
+  },
+  getEventsByKeyword(keyword: string, perPage: number, page: number) {
+    return apiClient.get('/events', { 
+      params: { 
+        title: keyword, 
+        _limit: perPage, 
+        _page: page 
+      } 
+    })
   }
 }

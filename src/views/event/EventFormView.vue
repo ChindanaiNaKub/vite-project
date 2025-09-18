@@ -3,6 +3,7 @@ import type { Event } from '@/types'
 import { ref } from 'vue'
 import EventService from '@/services/EventService'
 import { useRouter } from 'vue-router'
+import { useMessageStore } from '@/stores/message'
 
 const event = ref<Event>({
 	id: 0,
@@ -17,6 +18,7 @@ const event = ref<Event>({
 })
 
 const router = useRouter()
+const store = useMessageStore()
 
 function saveEvent() {
 	console.log('Attempting to save event:', event.value);
@@ -24,6 +26,10 @@ function saveEvent() {
 		.then((response) => {
 			console.log('Event saved successfully:', response.data);
 			router.push({ name: 'event-detail-view', params: { id: response.data.id } })
+			store.updateMessage('You are successfully add a new event for ' + response.data.title)
+			setTimeout(() => {
+				store.restMessage()
+			}, 3000)
 		})
 		.catch((error) => {
 			console.error('Error saving event:', error);
