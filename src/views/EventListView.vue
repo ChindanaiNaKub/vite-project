@@ -52,8 +52,16 @@ function updateKeyword(value: string) {
 
 onMounted(() => {
   watchEffect(() => {
+    EventService.getEvents(1, page.value)
+      .then((response) => {
+        events.value = response.data
+        totalEvents.value = Number(response.headers['x-total-count'] || response.headers['X-Total-Count'] || 0)
+      })
+      .catch(() => {
+        router.push({ name: 'network-error-view' })
+      })
     updateKeyword(keyword.value)
-  })
+  })  
 })
 
 function onPageSizeChange(e: Event) {
