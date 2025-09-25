@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Uploader from 'vue-media-upload'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 
 interface MediaFile {
   name: string
@@ -12,16 +12,19 @@ interface MediaFile {
 
 interface Props {
   modelValue?: string[]
+  maxFiles?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  modelValue: () => []
+  modelValue: () => [],
+  maxFiles: 0
 })
 
 const convertStringToMedia = (str: string[]): MediaFile[] => {
   return str.map((element: string) => {
     return {
-      name: element
+      name: element,
+      url: element // Use the string as both name and URL since it should be the Firebase URL
     }
   })
 }
@@ -31,18 +34,38 @@ const emit = defineEmits(['update:modelValue'])
 const convertMediaToString = (media: MediaFile[]): string[] => {
   const output: string[] = []
   media.forEach((element: MediaFile) => {
-    output.push(element.name)
+    // Try to use the URL first (which should be the Firebase URL), then fall back to name
+    const imageUrl = element.url || element.name
+    output.push(imageUrl)
   })
   return output
 }
 
-const media = ref(convertStringToMedia(props.modelValue))
+const media = ref<MediaFile[]>(convertStringToMedia(props.modelValue))
 const uploadUrl = ref(import.meta.env.VITE_UPLOAD_URL)
 const uploadError = ref(false)
 
+watch(
+  () => props.modelValue,
+  (value) => {
+    media.value = convertStringToMedia(value ?? [])
+  },
+  { deep: true }
+)
+
+const limitFiles = (files: MediaFile[]): MediaFile[] => {
+  if (props.maxFiles && props.maxFiles > 0) {
+    return files.slice(0, props.maxFiles)
+  }
+  return files
+}
+
 const onChanged = (files: MediaFile[]) => {
   uploadError.value = false
-  emit('update:modelValue', convertMediaToString(files))
+  const limitedFiles = limitFiles(files)
+  media.value = limitedFiles
+  const stringFiles = convertMediaToString(limitedFiles)
+  emit('update:modelValue', stringFiles)
 }
 
 const onUploadError = (error: any) => {

@@ -2,8 +2,10 @@
 import axios from 'axios'
 import type { Organization } from '@/types'
 
+const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'
+
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL,
+  baseURL: BASE_URL,
   withCredentials: false,
   headers: { Accept: 'application/json', 'Content-Type': 'application/json' }
 })
@@ -17,7 +19,11 @@ export default {
   },
   saveOrganization(organization: Organization) {
     // Remove the ID field as the backend will generate it
-    const { id, ...organizationWithoutId } = organization;
-    return apiClient.post('/organizations', organizationWithoutId)
+    const { id, ...organizationWithoutId } = organization
+    const payload = {
+      ...organizationWithoutId,
+      images: organizationWithoutId.images ?? []
+    }
+    return apiClient.post('/organizations', payload)
   }
 }

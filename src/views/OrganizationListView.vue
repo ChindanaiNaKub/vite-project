@@ -2,10 +2,8 @@
 import type { Organization } from '@/types'
 import { ref, onMounted } from 'vue'
 import OrganizationService from '@/services/OrganizationService'
-import { useRouter } from 'vue-router'
 
 const organizations = ref<Organization[]>([])
-const router = useRouter()
 
 onMounted(() => {
   // Try to load organizations, but handle the case where the backend endpoint doesn't exist yet
@@ -42,29 +40,41 @@ onMounted(() => {
     </div>
 
     <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      <div 
+      <router-link 
         v-for="organization in organizations" 
         :key="organization.id"
-        class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+        :to="{ name: 'organization-detail', params: { id: organization.id } }"
+        class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow block overflow-hidden"
       >
-        <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ organization.name }}</h3>
-        <p class="text-gray-600 mb-3">{{ organization.description }}</p>
-        
-        <div class="space-y-2 text-sm text-gray-500">
-          <p><span class="font-medium">Contact:</span> {{ organization.contactPerson }}</p>
-          <p><span class="font-medium">Email:</span> {{ organization.email }}</p>
-          <p v-if="organization.phone"><span class="font-medium">Phone:</span> {{ organization.phone }}</p>
-          <p v-if="organization.website">
-            <span class="font-medium">Website:</span> 
-            <a :href="organization.website" target="_blank" class="text-blue-500 hover:underline">
-              {{ organization.website }}
-            </a>
-          </p>
-          <p v-if="organization.establishedDate">
-            <span class="font-medium">Established:</span> {{ organization.establishedDate }}
-          </p>
+        <div v-if="organization.image" class="h-40 bg-gray-50 flex items-center justify-center overflow-hidden">
+          <img :src="organization.image" :alt="`${organization.name} logo`" class="object-cover w-full h-full" />
         </div>
-      </div>
+        <div class="p-6">
+          <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ organization.name }}</h3>
+          <p class="text-gray-600 mb-3">{{ organization.description }}</p>
+        
+          <div class="space-y-2 text-sm text-gray-500">
+            <p><span class="font-medium">Contact:</span> {{ organization.contactPerson }}</p>
+            <p><span class="font-medium">Email:</span> {{ organization.email }}</p>
+            <p v-if="organization.phone"><span class="font-medium">Phone:</span> {{ organization.phone }}</p>
+            <p v-if="organization.website">
+              <span class="font-medium">Website:</span> 
+              <a
+                :href="organization.website"
+                target="_blank"
+                rel="noopener"
+                class="text-blue-500 hover:underline"
+                @click.stop
+              >
+                {{ organization.website }}
+              </a>
+            </p>
+            <p v-if="organization.establishedDate">
+              <span class="font-medium">Established:</span> {{ organization.establishedDate }}
+            </p>
+          </div>
+        </div>
+      </router-link>
     </div>
   </div>
 </template>

@@ -14,6 +14,7 @@ import AddEventView from '@/views/event/EventFormView.vue'
 import OrganizationFormView from '@/views/OrganizationFormView.vue'
 import OrganizationListView from '@/views/OrganizationListView.vue'
 import AuctionListView from '@/views/AuctionListView.vue'
+import OrganizationDetailView from '@/views/OrganizationDetailView.vue'
 
 
 const router = createRouter({
@@ -90,6 +91,12 @@ const router = createRouter({
       path: '/organizations',
       name: 'organization-list',
       component: OrganizationListView
+    },
+    {
+      path: '/organizations/:id',
+      name: 'organization-detail',
+      component: OrganizationDetailView,
+      props: true
     },
     {
       path: '/network-error',

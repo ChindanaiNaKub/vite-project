@@ -66,5 +66,43 @@
       "petsAllowed": false,
       "organizer": "Brody Kill"
     }
+  ],
+  "organizations": [
+    {
+      "id": 1,
+      "name": "Green Earth Collective",
+      "description": "A community-driven non-profit focused on sustainable living education and urban farming initiatives.",
+      "address": "123 Harmony Ave, Chiang Mai",
+      "contactPerson": "Lina Sittichai",
+      "email": "hello@greenearth.th",
+      "phone": "+66 81 234 5678",
+      "website": "https://greenearth.th",
+      "establishedDate": "2017-03-21",
+      "image": "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=900&q=80"
+    },
+    {
+      "id": 2,
+      "name": "Northern Tech Volunteers",
+      "description": "Volunteers empowering rural schools with coding bootcamps, refurbished hardware, and mentorship programs.",
+      "address": "88 Innovation Rd, Chiang Mai",
+      "contactPerson": "Prasert Intanon",
+      "email": "contact@ntv.org",
+      "phone": "+66 98 765 4321",
+      "website": "https://ntv.org",
+      "establishedDate": "2015-11-05",
+      "image": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=80"
+    },
+    {
+      "id": 3,
+      "name": "Hopeful Paws Foundation",
+      "description": "Animal welfare organization providing rescue, rehabilitation, and adoption services for stray animals across Chiang Mai.",
+      "address": "55 Pawprint Ln, Chiang Mai",
+      "contactPerson": "Mayuree Phanumas",
+      "email": "team@hopefulpaws.or.th",
+      "phone": "+66 84 555 9911",
+      "website": "https://hopefulpaws.or.th",
+      "establishedDate": "2019-08-12",
+      "image": "https://images.unsplash.com/photo-1499336315816-097655dcfbda?auto=format&fit=crop&w=900&q=80"
+    }
   ]
 }

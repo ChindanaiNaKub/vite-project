@@ -38,5 +38,6 @@ export interface Organization {
   email: string
   phone: string
   website?: string
+  images?: string[]
   establishedDate: string
 }
