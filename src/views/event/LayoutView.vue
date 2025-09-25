@@ -1,10 +1,18 @@
 <script lang="ts" setup>
+import { onMounted } from 'vue'
 import { useEventStore } from '@/stores/event'
 import { storeToRefs } from 'pinia'
+
+const props = defineProps({
+  id: String
+})
 
 const store = useEventStore() 
 const { event } = storeToRefs(store)
 
+onMounted(() => {
+  store.fetchEvent(props.id!)
+})
 </script>
 
 <template>
