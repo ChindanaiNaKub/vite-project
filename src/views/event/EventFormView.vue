@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import type { Event } from '@/types'
-import { ref } from 'vue'
+import type { Event, Organizer } from '@/types'
+import { ref, onMounted } from 'vue'
 import EventService from '@/services/EventService'
+import OrganizerService from '@/services/OrganizerService'
 import { useRouter } from 'vue-router'
 import { useMessageStore } from '@/stores/message'
 import ImageUpload from '@/components/ImageUpload.vue'
+import BaseSelect from '@/components/BaseSelect.vue'
 
 const event = ref<Event>({
 	id: 0,
@@ -15,12 +17,39 @@ const event = ref<Event>({
 	date: '',
 	time: '',
 	petAllowed: false,
-	organizer: '',
+	organizer: {
+		id: 0,
+		name: ''
+	},
 	images: []
 })
 
 const router = useRouter()
 const store = useMessageStore()
+
+const organizers = ref<Organizer[]>([])
+
+onMounted(() => {
+	console.log('Fetching organizers...')
+	OrganizerService.getOrganizers()
+		.then((response) => {
+			console.log('Organizers fetched:', response.data)
+			// Extract only the essential data to avoid circular reference issues
+			if (Array.isArray(response.data)) {
+				organizers.value = response.data.map((org: any) => ({
+					id: org.id,
+					name: org.name
+				}))
+			}
+		})
+		.catch((error) => {
+			console.error('Error fetching organizers:', error)
+			console.error('Full error details:', error.response)
+			// Temporary: Don't redirect so we can see the form
+			// TODO: Fix backend to use DTOs as per lab section 6.2
+			// router.push({ name: 'network-error-view' })
+		})
+})
 
 function saveEvent() {
 	console.log('Attempting to save event:', event.value);
@@ -66,10 +95,9 @@ function saveEvent() {
 			<label>Time</label>
 			<input v-model="event.time" type="text" placeholder="Time (e.g., 3.00-4.00 pm.)" class="field" />
 
-			<h3>Event organizer</h3>
-			<label>Organizer</label>
-			<input v-model="event.organizer" type="text" placeholder="Organizer" class="field" />
-			
+			<h3>Who is your organizer?</h3>
+			<BaseSelect v-model="event.organizer.id" :options="organizers" label="Organizer" />
+
 			<h3>Upload images</h3>
 			<ImageUpload v-model="event.images" />
 			<button type="submit">Submit</button>

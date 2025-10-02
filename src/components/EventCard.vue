@@ -25,7 +25,9 @@ defineProps<{
   <RouterLink class="no-underline text-gray-700" :to="{name: 'event-detail-view', params: {id: event.id}}">
     <div class="cursor-pointer border border-gray-600 p-5 w-64 mb-4 hover:scale-105 hover:shadow-lg transition-all duration-200">
       <h2 class="text-xl font-semibold mb-2">{{ event.title }}</h2>
-      <span class="text-gray-600">@{{ event.category }} on {{ event.location }}</span>
+      <span>by</span>
+      <h5>{{ event.organizer.name }}</h5>
+      <span class="text-gray-600">{{ event.category }} @ {{ event.location }}</span>
     </div>
   <!-- <div v-if="event">
     <h1>{{ event.title }}</h1>

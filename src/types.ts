@@ -7,8 +7,13 @@ export interface Event {
   date: string
   time: string
   petAllowed: boolean
-  organizer: string
+  organizer: Organizer
   images: string[]
+}
+
+export interface Organizer {
+  id: number
+  name: string
 }
 
 export interface Student {
