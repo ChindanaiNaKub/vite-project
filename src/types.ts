@@ -14,6 +14,7 @@ export interface Event {
 export interface Organizer {
   id: number
   name: string
+  roles: string[]
 }
 
 export interface Student {
@@ -44,5 +45,6 @@ export interface Organization {
   phone: string
   website?: string
   images?: string[]
+  image?: string  // For backwards compatibility with db.json
   establishedDate: string
 }

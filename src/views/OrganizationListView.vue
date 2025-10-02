@@ -1,20 +1,35 @@
 <script setup lang="ts">
 import type { Organization } from '@/types'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onActivated } from 'vue'
 import OrganizationService from '@/services/OrganizationService'
 
 const organizations = ref<Organization[]>([])
 
-onMounted(() => {
+const loadOrganizations = () => {
   // Try to load organizations, but handle the case where the backend endpoint doesn't exist yet
-  OrganizationService.getOrganizations(10, 1)
+  OrganizationService.getOrganizations(100, 1)
     .then((response) => {
       organizations.value = response.data
+      console.log('Loaded organizations:', organizations.value)
+      // Debug: Check image format
+      if (organizations.value.length > 0) {
+        console.log('First org images:', organizations.value[0].images)
+        console.log('First org image:', organizations.value[0].image)
+      }
     })
     .catch((error) => {
       console.log('Organizations endpoint not available yet:', error.message)
       // Don't redirect to error page, just show empty list with message
     })
+}
+
+onMounted(() => {
+  loadOrganizations()
+})
+
+// Reload when the component is re-activated (navigating back to it)
+onActivated(() => {
+  loadOrganizations()
 })
 </script>
 
@@ -46,8 +61,8 @@ onMounted(() => {
         :to="{ name: 'organization-detail', params: { id: organization.id } }"
         class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow block overflow-hidden"
       >
-        <div v-if="organization.image" class="h-40 bg-gray-50 flex items-center justify-center overflow-hidden">
-          <img :src="organization.image" :alt="`${organization.name} logo`" class="object-cover w-full h-full" />
+        <div v-if="(organization.images && organization.images.length > 0) || organization.image" class="h-40 bg-gray-50 flex items-center justify-center overflow-hidden">
+          <img :src="organization.images?.[0] || organization.image" :alt="`${organization.name} logo`" class="object-cover w-full h-full" />
         </div>
         <div class="p-6">
           <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ organization.name }}</h3>

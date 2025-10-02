@@ -1,4 +1,5 @@
-import axios, { type AxiosResponse } from 'axios'
+import apiClient from './AxiosClient'
+import type { AxiosResponse } from 'axios'
 import type { AuctionItem } from '@/type/AuctionItem'
 
 // Service for AuctionItem related API calls
@@ -6,12 +7,6 @@ import type { AuctionItem } from '@/type/AuctionItem'
 //  - Backend endpoint base path: /auction-items
 //  - Supports query params: _limit, _page, description, type
 //  - Response headers include x-total-count for pagination (same pattern as events)
-
-const apiClient = axios.create({
-	baseURL: import.meta.env.VITE_BACKEND_URL,
-	withCredentials: false,
-	headers: { Accept: 'application/json', 'Content-Type': 'application/json' }
-})
 
 export default {
 	getAuctionItems(perPage: number, page: number): Promise<AxiosResponse<AuctionItem[]>> {

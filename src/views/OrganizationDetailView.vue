@@ -24,6 +24,11 @@ const loadOrganization = async () => {
   try {
     const response = await OrganizationService.getOrganization(id)
     organization.value = response.data
+    
+    // Debug: Log the organization data to see the image format
+    console.log('Organization data:', response.data)
+    console.log('Images:', response.data.images)
+    console.log('Image:', response.data.image)
   } catch (error: any) {
     if (error?.response?.status === 404) {
       router.replace({ name: '404-resource-view', params: { resource: 'organization' } })
@@ -45,12 +50,23 @@ onMounted(loadOrganization)
     <div v-if="loadError" class="error">{{ loadError }}</div>
 
     <div v-else-if="organization" class="detail-card">
-      <div class="images-wrapper" v-if="organization.images && organization.images.length > 0">
+      <!-- Support both images array and single image field -->
+      <div class="images-wrapper" v-if="(organization.images && organization.images.length > 0) || organization.image">
         <div class="flex flex-row flex-wrap justify-center">
+          <!-- If images array exists -->
+          <template v-if="organization.images && organization.images.length > 0">
+            <img
+              v-for="(image, index) in organization.images"
+              :key="index"
+              :src="image"
+              :alt="`${organization.name} image ${index + 1}`"
+              class="border-solid border-gray-200 border-2 rounded p-1 m-1 w-40 hover:shadow-lg"
+            />
+          </template>
+          <!-- If single image field exists -->
           <img
-            v-for="image in organization.images"
-            :key="image"
-            :src="image"
+            v-else-if="organization.image"
+            :src="organization.image"
             :alt="`${organization.name} image`"
             class="border-solid border-gray-200 border-2 rounded p-1 m-1 w-40 hover:shadow-lg"
           />
@@ -58,6 +74,7 @@ onMounted(loadOrganization)
       </div>
       <div v-else class="image-placeholder">
         <span>No image available</span>
+        <p class="text-xs text-gray-400 mt-2">Debug: images={{ organization.images }}, image={{ organization.image }}</p>
       </div>
 
       <div class="content">

@@ -31,6 +31,8 @@ const store = useMessageStore()
 
 function saveOrganization() {
 	console.log('Attempting to save organization:', organization.value);
+	console.log('Auth token present:', !!localStorage.getItem('access_token'));
+	
 	OrganizationService.saveOrganization(organization.value)
 		.then((response) => {
 			console.log('Organization saved successfully:', response.data);
@@ -43,7 +45,16 @@ function saveOrganization() {
 		.catch((error) => {
 			console.error('Error saving organization:', error);
 			console.error('Error details:', error.response?.data);
-			router.push({ name: 'network-error-view' })
+			console.error('Status:', error.response?.status);
+			
+			if (error.response?.status === 403 || error.response?.status === 401) {
+				store.updateMessage('Authentication error. Please log out and log in again.')
+				setTimeout(() => {
+					router.push({ name: 'login' })
+				}, 2000)
+			} else {
+				router.push({ name: 'network-error-view' })
+			}
 		})
 }
 </script>
