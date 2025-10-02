@@ -5,20 +5,54 @@ import OrganizationService from '@/services/OrganizationService'
 
 const organizations = ref<Organization[]>([])
 
+const getImageUrl = (org: Organization): string | null => {
+  // Try images array first (preferred format)
+  if (org.images && Array.isArray(org.images) && org.images.length > 0) {
+    const url = org.images[0]
+    console.log(`Using images[0] for ${org.name}:`, url)
+    return url
+  }
+  // Try single image field (fallback for older data)
+  if (org.image && typeof org.image === 'string') {
+    console.log(`Using image for ${org.name}:`, org.image)
+    return org.image
+  }
+  console.log(`No image found for ${org.name}`)
+  return null
+}
+
+const handleImageError = (event: Event, orgName: string, imageUrl: string | null) => {
+  console.error(`Failed to load image for ${orgName}:`, imageUrl)
+  const img = event.target as HTMLImageElement
+  img.style.display = 'none'
+  // Show parent container's fallback
+  const container = img.parentElement
+  if (container) {
+    container.innerHTML = '<div class="flex items-center justify-center h-full bg-gray-200"><span class="text-gray-400">🖼️ Image unavailable</span></div>'
+  }
+}
+
 const loadOrganizations = () => {
   // Try to load organizations, but handle the case where the backend endpoint doesn't exist yet
   OrganizationService.getOrganizations(100, 1)
     .then((response) => {
       organizations.value = response.data
-      console.log('Loaded organizations:', organizations.value)
-      // Debug: Check image format
-      if (organizations.value.length > 0) {
-        console.log('First org images:', organizations.value[0].images)
-        console.log('First org image:', organizations.value[0].image)
-      }
+      
+      // Enhanced debug logging
+      console.group('📦 Organizations Loaded')
+      console.log('Total count:', organizations.value.length)
+      organizations.value.forEach((org, index) => {
+        console.log(`[${index}] ${org.name}:`, {
+          id: org.id,
+          images: org.images,
+          image: org.image,
+          resolvedUrl: getImageUrl(org)
+        })
+      })
+      console.groupEnd()
     })
     .catch((error) => {
-      console.log('Organizations endpoint not available yet:', error.message)
+      console.error('Organizations endpoint error:', error.message)
       // Don't redirect to error page, just show empty list with message
     })
 }
@@ -61,8 +95,17 @@ onActivated(() => {
         :to="{ name: 'organization-detail', params: { id: organization.id } }"
         class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow block overflow-hidden"
       >
-        <div v-if="(organization.images && organization.images.length > 0) || organization.image" class="h-40 bg-gray-50 flex items-center justify-center overflow-hidden">
-          <img :src="organization.images?.[0] || organization.image" :alt="`${organization.name} logo`" class="object-cover w-full h-full" />
+        <div v-if="getImageUrl(organization)" class="h-40 bg-gray-50 flex items-center justify-center overflow-hidden">
+          <img 
+            :src="getImageUrl(organization)!" 
+            :alt="`${organization.name} logo`" 
+            class="object-cover w-full h-full"
+            @error="(e) => handleImageError(e, organization.name, getImageUrl(organization))"
+            loading="lazy"
+          />
+        </div>
+        <div v-else class="h-40 bg-gray-200 flex items-center justify-center">
+          <span class="text-gray-400 text-4xl">📷</span>
         </div>
         <div class="p-6">
           <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ organization.name }}</h3>

@@ -37,10 +37,28 @@ const emit = defineEmits(['update:modelValue'])
 const convertMediaToString = (media: MediaFile[]): string[] => {
   const output: string[] = []
   media.forEach((element: MediaFile) => {
-    // Try to use the URL first (which should be the Firebase URL), then fall back to name
-    const imageUrl = element.url || element.name
-    output.push(imageUrl)
+    // Get the URL - backend response puts Firebase URL in 'name' field
+    const imageUrl = element.name || element.url
+    
+    console.log('Processing image URL:', imageUrl)
+    
+    // CRITICAL FIX: Skip blob URLs - they're temporary preview URLs that don't persist
+    if (imageUrl && imageUrl.startsWith('blob:')) {
+      console.warn('⚠️ Skipping blob URL (temporary):', imageUrl)
+      console.log('ℹ️ Upload should complete and provide Firebase URL')
+      return // Don't add blob URLs to the output
+    }
+    
+    // Only add real HTTP/HTTPS URLs (Firebase URLs from backend)
+    if (imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
+      console.log('✅ Adding permanent Firebase URL:', imageUrl)
+      output.push(imageUrl)
+    } else if (imageUrl) {
+      console.warn('⚠️ Unexpected URL format:', imageUrl)
+    }
   })
+  
+  console.log('📦 Final URLs to emit:', output)
   return output
 }
 
