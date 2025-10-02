@@ -56,16 +56,27 @@ function saveEvent() {
 	EventService.saveEvent(event.value)
 		.then((response) => {
 			console.log('Event saved successfully:', response.data);
-			router.push({ name: 'event-detail-view', params: { id: response.data.id } })
 			store.updateMessage('You are successfully add a new event for ' + response.data.title)
 			setTimeout(() => {
 				store.restMessage()
 			}, 3000)
+			// Redirect to event list to see the new event
+			router.push({ name: 'event-list-view', query: { page: 1, pageSize: 2 } })
 		})
 		.catch((error) => {
 			console.error('Error saving event:', error);
 			console.error('Error details:', error.response?.data);
-			router.push({ name: 'network-error-view' })
+			
+			// Handle authentication errors
+			if (error.response?.status === 401 || error.response?.status === 403) {
+				store.updateMessage('You must be logged in to create an event')
+				setTimeout(() => {
+					store.restMessage()
+					router.push({ name: 'login', query: { redirect: '/add-event' } })
+				}, 2000)
+			} else {
+				router.push({ name: 'network-error-view' })
+			}
 		})
 }
 </script>

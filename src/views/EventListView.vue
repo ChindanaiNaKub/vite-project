@@ -4,7 +4,7 @@ import EventMeta from '@/components/EventMeta.vue'
 import BaseInput from '@/components/BaseInput.vue'
 import type { Event as EventType } from '@/types'
 import type { Student } from '@/type/Student'
-import { ref, onMounted, computed, watchEffect } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import EventService from '@/services/EventService'
 import StudentService from '@/services/StudentService'
 import { useRouter } from 'vue-router'
@@ -34,25 +34,23 @@ const students = ref<Student[]>([])
 const router = useRouter()
 
 function updateKeyword(value: string) {
-  let queryFunction;
-  if (keyword.value === '') {
-    queryFunction = EventService.getEvents(pageSize.value, page.value)
-  } else {
-    queryFunction = EventService.getEventsByKeyword(keyword.value, pageSize.value, page.value)
-  }
+  const queryFunction = keyword.value === '' 
+    ? EventService.getEvents(pageSize.value, page.value)
+    : EventService.getEventsByKeyword(keyword.value, pageSize.value, page.value)
+  
   queryFunction.then((response) => {
     events.value = response.data
     console.log('events', events.value)
     totalEvents.value = Number(response.headers['x-total-count'] || response.headers['X-Total-Count'] || 0)
     console.log('totalEvent', totalEvents.value)
   }).catch(() => {
-    router.push({ name: 'NetworkError' })
+    router.push({ name: 'network-error-view' })
   })
 }
 
-onMounted(() => {
-  watchEffect(() => {
-    EventService.getEvents(1, page.value)
+function fetchEvents() {
+  if (keyword.value === '') {
+    EventService.getEvents(pageSize.value, page.value)
       .then((response) => {
         events.value = response.data
         totalEvents.value = Number(response.headers['x-total-count'] || response.headers['X-Total-Count'] || 0)
@@ -60,8 +58,23 @@ onMounted(() => {
       .catch(() => {
         router.push({ name: 'network-error-view' })
       })
+  } else {
     updateKeyword(keyword.value)
-  })  
+  }
+}
+
+onMounted(() => {
+  fetchEvents()
+})
+
+// Watch for changes in page and pageSize
+watch([page, pageSize], () => {
+  fetchEvents()
+})
+
+// Watch for changes in keyword
+watch(keyword, () => {
+  fetchEvents()
 })
 
 function onPageSizeChange(e: Event) {
