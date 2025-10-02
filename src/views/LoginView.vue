@@ -46,7 +46,7 @@ const onSubmit = handleSubmit((values) => {
       TokenRefreshService.startAutoRefresh()
       
       // Redirect back to where user was, or default to event list
-      const destination = redirectPath || '/events'
+      const destination = redirectPath || '/'
       router.push(destination)
     })
     .catch(() => {
@@ -108,9 +108,12 @@ const onSubmit = handleSubmit((values) => {
       <p class="mt-10 text-center text-sm text-gray-500">
         Not a member?
         {{ ' ' }}
-        <a href="#" class="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
-          >Try to register here</a
+        <router-link
+          to="/register"
+          class="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
         >
+          Try to register here
+        </router-link>
       </p>
     </div>
   </div>

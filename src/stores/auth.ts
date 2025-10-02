@@ -52,6 +52,30 @@ export const useAuthStore = defineStore('auth', {
         })
     },
     
+    register(userData: {
+      username: string
+      email: string
+      password: string
+      firstname: string
+      lastname: string
+    }) {
+      return apiClient
+        .post('/api/v1/auth/register', userData)
+        .then((response) => {
+          this.token = response.data.access_token
+          this.refreshToken = response.data.refresh_token
+          this.user = response.data.user
+          
+          // Store tokens
+          localStorage.setItem('access_token', this.token as string)
+          localStorage.setItem('refresh_token', this.refreshToken as string)
+          localStorage.setItem('user', JSON.stringify(this.user))
+          
+          axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
+          return response
+        })
+    },
+    
     async refreshAccessToken() {
       if (this.isRefreshing) {
         return // Already refreshing, avoid multiple calls

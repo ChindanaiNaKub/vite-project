@@ -16,6 +16,7 @@ import OrganizationListView from '@/views/OrganizationListView.vue'
 import AuctionListView from '@/views/AuctionListView.vue'
 import OrganizationDetailView from '@/views/OrganizationDetailView.vue'
 import LoginView from '@/views/LoginView.vue'
+import RegisterView from '@/views/RegisterView.vue'
 
 
 const router = createRouter({
@@ -25,6 +26,7 @@ const router = createRouter({
       path: '/',
       name: 'event-list-view',
       component: EventListView,
+      alias: '/events', // Add alias so /events also works
       props: (route) => {
         let page = Number(route.query.page)
         if (!page || isNaN(page) || page < 1) page = 1
@@ -42,6 +44,11 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: LoginView
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: RegisterView
     },
     {
       path: '/event/:id',
