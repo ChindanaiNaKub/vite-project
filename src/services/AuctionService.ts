@@ -25,6 +25,11 @@ export default {
 		params.push(`_limit=${perPage}`)
 		params.push(`_page=${page}`)
 		return apiClient.get<AuctionItem[]>(`/auction-items?${params.join('&')}`)
+	},
+	saveAuctionItem(auctionItem: Partial<AuctionItem>): Promise<AxiosResponse<AuctionItem>> {
+		// Remove the ID field if present, as the backend will generate it
+		const { id, ...itemWithoutId } = auctionItem as AuctionItem
+		return apiClient.post<AuctionItem>('/auction-items', itemWithoutId)
 	}
 }
 

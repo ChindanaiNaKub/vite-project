@@ -19,7 +19,8 @@ const event = ref<Event>({
 	petAllowed: false,
 	organizer: {
 		id: 0,
-		name: ''
+		name: '',
+		roles: []
 	},
 	images: []
 })
@@ -38,7 +39,8 @@ onMounted(() => {
 			if (Array.isArray(response.data)) {
 				organizers.value = response.data.map((org: any) => ({
 					id: org.id,
-					name: org.name
+					name: org.name,
+					roles: org.roles || []
 				}))
 			}
 		})

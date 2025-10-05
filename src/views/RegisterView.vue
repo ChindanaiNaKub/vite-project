@@ -5,7 +5,6 @@ import { useMessageStore } from '@/stores/message'
 import { useRouter } from 'vue-router'
 import * as yup from 'yup'
 import { useField, useForm } from 'vee-validate'
-import TokenRefreshService from '@/services/TokenRefreshService'
 
 const authStore = useAuthStore()
 const messageStore = useMessageStore()
@@ -69,16 +68,13 @@ const onSubmit = handleSubmit((values) => {
       lastname: values.lastname
     })
     .then(() => {
-      // Start automatic token refresh
-      TokenRefreshService.startAutoRefresh()
-      
       messageStore.updateMessage('Registration successful! Welcome!')
       setTimeout(() => {
         messageStore.restMessage()
       }, 3000)
       
       // Redirect to events page
-      router.push('/')
+      router.push({ name: 'event-list-view' })
     })
     .catch((error: any) => {
       const errorMessage = error.response?.data?.message || 'Registration failed. Please try again.'

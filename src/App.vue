@@ -4,39 +4,23 @@ import { useMessageStore } from '@/stores/message'
 import { useAuthStore } from './stores/auth'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
-import { onMounted, onUnmounted } from 'vue'
 import SvgIcon from '@/components/SvgIcon.vue'
 import { mdiAccountPlus, mdiLogin, mdiLogout, mdiAccount } from '@mdi/js'
-import TokenRefreshService from '@/services/TokenRefreshService'
 
 const store = useMessageStore()
 const authStore = useAuthStore()
 const router = useRouter()
 const { message } = storeToRefs(store)
 
-// Reload auth state from localStorage
+// Load auth state from localStorage on startup
 const token = localStorage.getItem('access_token')
 const user = localStorage.getItem('user')
 if (token && user) {
-  authStore.reload(token, JSON.parse(user))
-} else {
-  authStore.logout()
+  authStore.token = token
+  authStore.user = JSON.parse(user)
 }
 
-// Start auto token refresh when app loads
-onMounted(() => {
-  if (authStore.token && authStore.refreshToken) {
-    TokenRefreshService.startAutoRefresh()
-  }
-})
-
-// Stop auto refresh when app unmounts
-onUnmounted(() => {
-  TokenRefreshService.stopAutoRefresh()
-})
-
 function logout() {
-  TokenRefreshService.stopAutoRefresh()
   authStore.logout()
   router.push({ name: 'login' })
 }
@@ -84,6 +68,14 @@ function logout() {
               :to="{ name: 'auction-list' }"
               >Auctions</RouterLink
             >
+            <span v-if="authStore.isAdmin">
+              <RouterLink
+                class="font-bold text-gray-700"
+                exact-active-class="text-green-500"
+                :to="{ name: 'add-auction' }"
+                >New Auction</RouterLink
+              >
+            </span>
           </div>
           <ul v-if="!authStore.currentUserName" class="flex navbar-nav ml-auto space-x-2">
             <li class="nav-item px-2">

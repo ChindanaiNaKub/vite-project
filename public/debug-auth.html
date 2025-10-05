@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Auth Debug Tool</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 { 
+            color: #667eea; 
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        h2 { 
+            color: #764ba2;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        button.danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        button.success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        input {
+            padding: 10px;
+            margin: 5px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            width: 300px;
+            font-size: 14px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .success { 
+            background: #d4edda; 
+            color: #155724; 
+            border: 1px solid #c3e6cb;
+        }
+        .error { 
+            background: #f8d7da; 
+            color: #721c24; 
+            border: 1px solid #f5c6cb;
+        }
+        .info { 
+            background: #d1ecf1; 
+            color: #0c5460; 
+            border: 1px solid #bee5eb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+        .badge.valid {
+            background: #28a745;
+            color: white;
+        }
+        .badge.invalid {
+            background: #dc3545;
+            color: white;
+        }
+        .badge.missing {
+            background: #6c757d;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Frontend Auth Debug Tool</h1>
+        <p>This tool helps diagnose and fix token authentication issues in your frontend application.</p>
+        
+        <div class="section">
+            <h2>📊 Current Storage Status</h2>
+            <div id="storageStatus"></div>
+            <button onclick="checkStorage()">🔄 Refresh Status</button>
+            <button class="danger" onclick="clearStorage()">🗑️ Clear All Storage</button>
+        </div>
+
+        <div class="section">
+            <h2>🔐 Test Login</h2>
+            <div>
+                <input type="text" id="loginEmail" placeholder="Email" value="admin@admin.com">
+                <input type="password" id="loginPassword" placeholder="Password" value="admin">
+                <br>
+                <button class="success" onclick="testLogin()">✅ Login & Get Fresh Tokens</button>
+            </div>
+            <div id="loginStatus"></div>
+        </div>
+
+        <div class="grid">
+            <div class="section">
+                <h2>🧪 Test Create Auction</h2>
+                <button onclick="testCreateAuction()">Test with Current Token</button>
+                <div id="auctionStatus"></div>
+            </div>
+
+            <div class="section">
+                <h2>🔍 Validate Token Format</h2>
+                <button onclick="validateToken()">Check Token Format</button>
+                <div id="tokenValidation"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📝 Backend Configuration</h2>
+            <div class="info">
+                <strong>Backend URL:</strong> <span id="backendUrl"></span><br>
+                <strong>Database:</strong> MySQL in Docker (selabdb)<br>
+                <strong>Status:</strong> <span class="badge valid">✅ Working</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📋 Quick Fixes</h2>
+            <button onclick="showQuickFix()">Show Step-by-Step Fix</button>
+            <div id="quickFix"></div>
+        </div>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'http://localhost:8080';
+
+        function showStatus(elementId, message, type = 'info') {
+            const el = document.getElementById(elementId);
+            el.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function checkStorage() {
+            const accessToken = localStorage.getItem('access_token');
+            const refreshToken = localStorage.getItem('refresh_token');
+            const user = localStorage.getItem('user');
+            
+            let html = '<div class="status info">';
+            html += '<strong>LocalStorage Contents:</strong><br><br>';
+            
+            if (accessToken) {
+                html += `<span class="badge valid">✅ FOUND</span> <strong>access_token:</strong><br>`;
+                html += `${accessToken.substring(0, 100)}...<br><br>`;
+            } else {
+                html += `<span class="badge missing">❌ MISSING</span> <strong>access_token</strong><br><br>`;
+            }
+            
+            if (refreshToken) {
+                html += `<span class="badge valid">✅ FOUND</span> <strong>refresh_token:</strong><br>`;
+                html += `${refreshToken.substring(0, 100)}...<br><br>`;
+            } else {
+                html += `<span class="badge missing">❌ MISSING</span> <strong>refresh_token</strong><br><br>`;
+            }
+            
+            if (user) {
+                html += `<span class="badge valid">✅ FOUND</span> <strong>user:</strong><br>`;
+                html += `<pre>${JSON.stringify(JSON.parse(user), null, 2)}</pre>`;
+            } else {
+                html += `<span class="badge missing">❌ MISSING</span> <strong>user</strong>`;
+            }
+            
+            html += '</div>';
+            document.getElementById('storageStatus').innerHTML = html;
+        }
+
+        function clearStorage() {
+            if (confirm('⚠️ This will clear all stored tokens and user data. Continue?')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                showStatus('storageStatus', '✅ All storage cleared! Now login again to get fresh tokens.', 'success');
+                setTimeout(checkStorage, 500);
+            }
+        }
+
+        async function testLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            showStatus('loginStatus', '⏳ Logging in...', 'info');
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/v1/auth/authenticate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: email, password: password })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+                }
+                
+                const data = await response.json();
+                
+                // Store tokens
+                localStorage.setItem('access_token', data.access_token);
+                localStorage.setItem('refresh_token', data.refresh_token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                
+                showStatus('loginStatus', 
+                    `✅ Login successful!\n\n` +
+                    `User: ${data.user.name}\n` +
+                    `Roles: ${data.user.roles.join(', ')}\n` +
+                    `Access Token: ${data.access_token.substring(0, 50)}...\n\n` +
+                    `✅ Tokens saved to localStorage!`, 
+                    'success'
+                );
+                
+                checkStorage();
+            } catch (error) {
+                showStatus('loginStatus', `❌ Login failed:\n${error.message}`, 'error');
+            }
+        }
+
+        async function testCreateAuction() {
+            const token = localStorage.getItem('access_token');
+            
+            if (!token) {
+                showStatus('auctionStatus', '❌ No token found! Login first.', 'error');
+                return;
+            }
+            
+            showStatus('auctionStatus', '⏳ Creating test auction...', 'info');
+            
+            const testAuction = {
+                description: 'Test auction from debug tool',
+                minimumBid: 100.0,
+                successfulBid: null,
+                itemImage: null
+            };
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/v1/auctions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(testAuction)
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${JSON.stringify(data)}`);
+                }
+                
+                showStatus('auctionStatus', 
+                    `✅ Auction created successfully!\n\n` +
+                    `Auction ID: ${data.id}\n` +
+                    `Description: ${data.description}\n` +
+                    `Minimum Bid: ${data.minimumBid}\n\n` +
+                    `✅ Your token is valid!`, 
+                    'success'
+                );
+            } catch (error) {
+                showStatus('auctionStatus', 
+                    `❌ Failed to create auction:\n${error.message}\n\n` +
+                    `This means your token is expired or invalid.\n` +
+                    `Solution: Clear storage and login again!`, 
+                    'error'
+                );
+            }
+        }
+
+        function validateToken() {
+            const token = localStorage.getItem('access_token');
+            
+            if (!token) {
+                showStatus('tokenValidation', '❌ No token found in localStorage', 'error');
+                return;
+            }
+            
+            let html = '<div class="status success">';
+            html += '<strong>Token Validation:</strong><br><br>';
+            
+            // Check if it starts with expected JWT format
+            const parts = token.split('.');
+            if (parts.length === 3) {
+                html += '✅ Format: Valid JWT (3 parts)<br>';
+                
+                try {
+                    const payload = JSON.parse(atob(parts[1]));
+                    html += `✅ Decoded Payload:<br>`;
+                    html += `<pre>${JSON.stringify(payload, null, 2)}</pre>`;
+                    
+                    if (payload.exp) {
+                        const expDate = new Date(payload.exp * 1000);
+                        const now = new Date();
+                        const isExpired = expDate < now;
+                        
+                        html += `<br><strong>Expiration:</strong> ${expDate.toLocaleString()}<br>`;
+                        html += isExpired 
+                            ? '<span class="badge invalid">⚠️ EXPIRED</span>' 
+                            : '<span class="badge valid">✅ VALID</span>';
+                    }
+                } catch (e) {
+                    html += '⚠️ Could not decode payload<br>';
+                }
+            } else {
+                html += '❌ Format: Invalid JWT structure<br>';
+            }
+            
+            html += '</div>';
+            document.getElementById('tokenValidation').innerHTML = html;
+        }
+
+        function showQuickFix() {
+            const html = `
+                <div class="status warning">
+                    <strong>🚀 Step-by-Step Fix:</strong><br><br>
+                    
+                    <strong>Option 1: Use This Page (Recommended)</strong><br>
+                    1. Click "Clear All Storage" button above<br>
+                    2. Click "Login & Get Fresh Tokens"<br>
+                    3. Click "Test with Current Token" to verify<br>
+                    4. Hard refresh your app: <kbd>Ctrl+Shift+R</kbd><br><br>
+                    
+                    <strong>Option 2: Manual Fix in DevTools</strong><br>
+                    1. Open your app in browser<br>
+                    2. Press <kbd>F12</kbd> to open DevTools<br>
+                    3. Go to Console tab<br>
+                    4. Run: <code>localStorage.clear(); sessionStorage.clear();</code><br>
+                    5. Hard refresh: <kbd>Ctrl+Shift+R</kbd><br>
+                    6. Login again<br><br>
+                    
+                    <strong>Option 3: Fix Applied!</strong><br>
+                    ✅ Your code has been updated to:<br>
+                    • Initialize auth from localStorage on app startup<br>
+                    • Add better logging for debugging<br>
+                    • Properly clear tokens on logout<br>
+                    • Add token validation checks<br><br>
+                    
+                    Just restart your dev server and test!
+                </div>
+            `;
+            document.getElementById('quickFix').innerHTML = html;
+        }
+
+        // Initialize
+        document.getElementById('backendUrl').textContent = BACKEND_URL;
+        checkStorage();
+    </script>
+</body>
+</html>

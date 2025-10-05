@@ -1,0 +1,32 @@
+<!-- Test the current login status -->
+<script>
+// Open browser console and run this:
+console.log('Current user:', JSON.parse(localStorage.getItem('user') || '{}'));
+console.log('Access token:', localStorage.getItem('access_token'));
+
+// Decode the JWT token to see roles
+const token = localStorage.getItem('access_token');
+if (token) {
+  const payload = token.split('.')[1];
+  const decoded = JSON.parse(atob(payload));
+  console.log('Token payload:', decoded);
+  console.log('Roles in token:', decoded.roles);
+}
+</script>
+
+Run the above code in your browser console (F12 -> Console tab) while on http://localhost:5173 to check:
+1. What user you're logged in as
+2. What roles that user has
+3. Whether the JWT token contains ROLE_ADMIN
+
+Expected output for admin user:
+```json
+{
+  "sub": "admin",
+  "roles": ["ROLE_USER", "ROLE_ADMIN"],
+  "iat": 1234567890,
+  "exp": 1234567890
+}
+```
+
+If you DON'T see "ROLE_ADMIN" in the roles array, that's why you're getting 403!

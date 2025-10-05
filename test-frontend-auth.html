@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Auth Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        button.danger {
+            background: #e74c3c;
+        }
+        button.danger:hover {
+            background: #c0392b;
+        }
+        button.success {
+            background: #27ae60;
+        }
+        button.success:hover {
+            background: #229954;
+        }
+        .output {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .error {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .info {
+            color: #3498db;
+        }
+        .warning {
+            color: #f39c12;
+            font-weight: bold;
+        }
+        .step {
+            background: #fff;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        .status.ok {
+            background: #d5f4e6;
+            color: #27ae60;
+        }
+        .status.fail {
+            background: #fadbd8;
+            color: #e74c3c;
+        }
+        input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 200px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Frontend Authentication Debugger</h1>
+        <p>This tool will help you debug the 403 error by testing each step of the authentication flow.</p>
+
+        <div class="step">
+            <h2>Step 1: Check Current Storage</h2>
+            <button onclick="checkStorage()">Check Storage</button>
+            <button class="danger" onclick="clearStorage()">Clear All Storage</button>
+            <div id="storage-output" class="output"></div>
+        </div>
+
+        <div class="step">
+            <h2>Step 2: Test Backend Authentication</h2>
+            <input type="text" id="username" placeholder="Username" value="admin">
+            <input type="password" id="password" placeholder="Password" value="admin">
+            <button class="success" onclick="testLogin()">Test Login</button>
+            <div id="login-output" class="output"></div>
+        </div>
+
+        <div class="step">
+            <h2>Step 3: Test Auction Creation</h2>
+            <button class="success" onclick="testAuctionCreation()">Create Test Auction</button>
+            <div id="auction-output" class="output"></div>
+        </div>
+
+        <div class="step">
+            <h2>Step 4: Full Integration Test</h2>
+            <button onclick="runFullTest()">Run Complete Test</button>
+            <div id="full-test-output" class="output"></div>
+        </div>
+
+        <div class="step">
+            <h2>Quick Fix Actions</h2>
+            <button class="danger" onclick="quickFix()">🚀 Quick Fix (Clear & Reload)</button>
+            <p style="color: #7f8c8d; font-size: 14px;">This will clear all storage and reload the page. You'll need to login again.</p>
+        </div>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'http://localhost:8080';
+
+        function log(elementId, message, type = 'info') {
+            const output = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info';
+            output.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearOutput(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
+
+        function checkStorage() {
+            clearOutput('storage-output');
+            log('storage-output', '=== Checking Browser Storage ===', 'info');
+            
+            // Check localStorage
+            log('storage-output', '\n📦 LocalStorage:', 'info');
+            if (localStorage.length === 0) {
+                log('storage-output', '  ❌ LocalStorage is EMPTY', 'warning');
+            } else {
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    const value = localStorage.getItem(key);
+                    if (key.includes('token')) {
+                        log('storage-output', `  ✓ ${key}: ${value.substring(0, 50)}...`, 'success');
+                    } else {
+                        log('storage-output', `  ✓ ${key}: ${value.substring(0, 100)}`, 'success');
+                    }
+                }
+            }
+
+            // Check sessionStorage
+            log('storage-output', '\n📦 SessionStorage:', 'info');
+            if (sessionStorage.length === 0) {
+                log('storage-output', '  ✓ SessionStorage is empty (OK)', 'success');
+            } else {
+                for (let i = 0; i < sessionStorage.length; i++) {
+                    const key = sessionStorage.key(i);
+                    const value = sessionStorage.getItem(key);
+                    log('storage-output', `  ${key}: ${value.substring(0, 100)}`, 'info');
+                }
+            }
+
+            // Validate token format
+            const token = localStorage.getItem('access_token');
+            if (token) {
+                log('storage-output', '\n🔑 Token Validation:', 'info');
+                if (token.startsWith('eyJ')) {
+                    log('storage-output', '  ✓ Token format looks valid (JWT)', 'success');
+                } else {
+                    log('storage-output', '  ❌ Token format is INVALID', 'error');
+                }
+            } else {
+                log('storage-output', '\n⚠️  No access_token found in localStorage', 'warning');
+            }
+        }
+
+        function clearStorage() {
+            clearOutput('storage-output');
+            log('storage-output', '🧹 Clearing all storage...', 'warning');
+            localStorage.clear();
+            sessionStorage.clear();
+            log('storage-output', '✓ Storage cleared successfully!', 'success');
+            log('storage-output', '\n💡 Now you can login fresh from your app', 'info');
+            checkStorage();
+        }
+
+        async function testLogin() {
+            clearOutput('login-output');
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            log('login-output', '=== Testing Backend Login ===', 'info');
+            log('login-output', `Username: ${username}`, 'info');
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/v1/auth/authenticate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                log('login-output', `\n📡 Response Status: ${response.status}`, response.ok ? 'success' : 'error');
+
+                if (response.ok) {
+                    const data = await response.json();
+                    log('login-output', '\n✅ Login SUCCESSFUL!', 'success');
+                    log('login-output', `User: ${data.user.name}`, 'info');
+                    log('login-output', `Roles: ${data.user.roles.join(', ')}`, 'info');
+                    log('login-output', `Access Token: ${data.access_token.substring(0, 50)}...`, 'info');
+                    log('login-output', `Refresh Token: ${data.refresh_token.substring(0, 50)}...`, 'info');
+
+                    // Store tokens
+                    localStorage.setItem('access_token', data.access_token);
+                    localStorage.setItem('refresh_token', data.refresh_token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+
+                    log('login-output', '\n💾 Tokens stored in localStorage', 'success');
+                    window.testToken = data.access_token;
+                } else {
+                    const errorText = await response.text();
+                    log('login-output', `\n❌ Login FAILED: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                log('login-output', `\n❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAuctionCreation() {
+            clearOutput('auction-output');
+            const token = localStorage.getItem('access_token') || window.testToken;
+
+            log('auction-output', '=== Testing Auction Creation ===', 'info');
+
+            if (!token) {
+                log('auction-output', '❌ No token found! Please login first.', 'error');
+                return;
+            }
+
+            log('auction-output', `🔑 Using token: ${token.substring(0, 50)}...`, 'info');
+
+            const auctionData = {
+                name: 'Test Auction ' + new Date().toISOString(),
+                description: 'Test from debugger',
+                startingPrice: 100,
+                auctionEnd: '2025-10-15T10:00:00'
+            };
+
+            log('auction-output', `📝 Auction data: ${JSON.stringify(auctionData, null, 2)}`, 'info');
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/auction-items`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(auctionData)
+                });
+
+                log('auction-output', `\n📡 Response Status: ${response.status}`, response.ok ? 'success' : 'error');
+
+                if (response.ok) {
+                    const data = await response.json();
+                    log('auction-output', '\n✅ Auction Created SUCCESSFULLY!', 'success');
+                    log('auction-output', `Auction ID: ${data.id}`, 'success');
+                    log('auction-output', `Response: ${JSON.stringify(data, null, 2)}`, 'info');
+                } else {
+                    const errorText = await response.text();
+                    log('auction-output', `\n❌ Auction Creation FAILED`, 'error');
+                    log('auction-output', `Status: ${response.status}`, 'error');
+                    log('auction-output', `Error: ${errorText}`, 'error');
+
+                    if (response.status === 403) {
+                        log('auction-output', '\n🔍 Diagnosis: 403 Forbidden', 'error');
+                        log('auction-output', 'This means your token is invalid or expired!', 'warning');
+                        log('auction-output', 'Solution: Clear storage and login again', 'warning');
+                    }
+                }
+            } catch (error) {
+                log('auction-output', `\n❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function runFullTest() {
+            clearOutput('full-test-output');
+            log('full-test-output', '🚀 Starting Full Integration Test...', 'info');
+            log('full-test-output', '=' .repeat(50), 'info');
+
+            // Step 1: Check storage
+            log('full-test-output', '\n[1/4] Checking current storage...', 'info');
+            const hasToken = !!localStorage.getItem('access_token');
+            log('full-test-output', `Token present: ${hasToken ? '✓ YES' : '❌ NO'}`, hasToken ? 'success' : 'error');
+
+            // Step 2: Login
+            log('full-test-output', '\n[2/4] Testing login...', 'info');
+            try {
+                const loginResponse = await fetch(`${BACKEND_URL}/api/v1/auth/authenticate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: 'admin', password: 'admin' })
+                });
+
+                if (loginResponse.ok) {
+                    const loginData = await loginResponse.json();
+                    log('full-test-output', '✅ Login successful', 'success');
+                    localStorage.setItem('access_token', loginData.access_token);
+                    localStorage.setItem('refresh_token', loginData.refresh_token);
+                    window.testToken = loginData.access_token;
+
+                    // Step 3: Create auction
+                    log('full-test-output', '\n[3/4] Testing auction creation...', 'info');
+                    const auctionResponse = await fetch(`${BACKEND_URL}/auction-items`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${loginData.access_token}`
+                        },
+                        body: JSON.stringify({
+                            name: 'Full Test Auction',
+                            description: 'Complete integration test',
+                            startingPrice: 100,
+                            auctionEnd: '2025-10-15T10:00:00'
+                        })
+                    });
+
+                    if (auctionResponse.ok) {
+                        const auctionData = await auctionResponse.json();
+                        log('full-test-output', '✅ Auction creation successful', 'success');
+                        log('full-test-output', `Created auction ID: ${auctionData.id}`, 'success');
+                    } else {
+                        log('full-test-output', `❌ Auction creation failed: ${auctionResponse.status}`, 'error');
+                    }
+                } else {
+                    log('full-test-output', `❌ Login failed: ${loginResponse.status}`, 'error');
+                }
+            } catch (error) {
+                log('full-test-output', `❌ Test failed: ${error.message}`, 'error');
+            }
+
+            // Step 4: Verify storage
+            log('full-test-output', '\n[4/4] Verifying final storage state...', 'info');
+            const finalToken = localStorage.getItem('access_token');
+            log('full-test-output', `Token stored: ${finalToken ? '✓ YES' : '❌ NO'}`, finalToken ? 'success' : 'error');
+
+            log('full-test-output', '\n' + '='.repeat(50), 'info');
+            log('full-test-output', '✅ Full test completed!', 'success');
+        }
+
+        function quickFix() {
+            if (confirm('This will clear all storage and reload the page. Continue?')) {
+                console.log('🚀 Quick Fix: Clearing storage...');
+                localStorage.clear();
+                sessionStorage.clear();
+                console.log('✓ Storage cleared!');
+                alert('Storage cleared! Page will reload. Please login again.');
+                location.reload();
+            }
+        }
+
+        // Auto-check storage on load
+        window.addEventListener('load', () => {
+            checkStorage();
+        });
+    </script>
+</body>
+</html>

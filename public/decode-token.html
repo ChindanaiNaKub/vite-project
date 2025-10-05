@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Decode JWT Token</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .token-info {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        pre {
+            background: #fff;
+            padding: 10px;
+            border: 1px solid #ddd;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>JWT Token Decoder</h1>
+    <div id="result"></div>
+    
+    <script>
+        function decodeJWT(token) {
+            try {
+                const parts = token.split('.');
+                if (parts.length !== 3) {
+                    return { error: 'Invalid token format' };
+                }
+                
+                const payload = JSON.parse(atob(parts[1]));
+                return payload;
+            } catch (e) {
+                return { error: e.message };
+            }
+        }
+        
+        function checkTokenExpiry(payload) {
+            if (!payload.exp) return 'No expiry found';
+            
+            const now = Math.floor(Date.now() / 1000);
+            const expiry = payload.exp;
+            
+            if (now > expiry) {
+                return `<span class="error">❌ TOKEN EXPIRED!</span> (Expired ${Math.floor((now - expiry) / 60)} minutes ago)`;
+            } else {
+                const minutesLeft = Math.floor((expiry - now) / 60);
+                return `<span class="success">✅ Token valid for ${minutesLeft} more minutes</span>`;
+            }
+        }
+        
+        const token = localStorage.getItem('access_token');
+        const resultDiv = document.getElementById('result');
+        
+        if (!token) {
+            resultDiv.innerHTML = '<p class="error">❌ NO TOKEN FOUND IN LOCALSTORAGE!</p>';
+        } else {
+            const payload = decodeJWT(token);
+            
+            if (payload.error) {
+                resultDiv.innerHTML = `<p class="error">❌ Error decoding token: ${payload.error}</p>`;
+            } else {
+                const expiryStatus = checkTokenExpiry(payload);
+                
+                resultDiv.innerHTML = `
+                    <div class="token-info">
+                        <h2>Token Status</h2>
+                        <p>${expiryStatus}</p>
+                    </div>
+                    
+                    <div class="token-info">
+                        <h2>Token Details</h2>
+                        <p><strong>Subject:</strong> ${payload.sub || 'N/A'}</p>
+                        <p><strong>Issued At:</strong> ${payload.iat ? new Date(payload.iat * 1000).toLocaleString() : 'N/A'}</p>
+                        <p><strong>Expires At:</strong> ${payload.exp ? new Date(payload.exp * 1000).toLocaleString() : 'N/A'}</p>
+                        <p><strong>Roles:</strong> ${payload.roles ? payload.roles.join(', ') : 'N/A'}</p>
+                    </div>
+                    
+                    <div class="token-info">
+                        <h2>Full Payload</h2>
+                        <pre>${JSON.stringify(payload, null, 2)}</pre>
+                    </div>
+                    
+                    <div class="token-info">
+                        <h2>Full Token</h2>
+                        <pre style="word-break: break-all;">${token}</pre>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -5,22 +5,10 @@ import { useMessageStore } from '@/stores/message'
 import { useRouter } from 'vue-router'
 import * as yup from 'yup'
 import { useField, useForm } from 'vee-validate'
-import TokenRefreshService from '@/services/TokenRefreshService'
 
 const authStore = useAuthStore()
 const messageStore = useMessageStore()
 const router = useRouter()
-
-// Check if user was redirected here due to session expiration
-const sessionExpiredMessage = router.currentRoute.value.query.message as string
-const redirectPath = router.currentRoute.value.query.redirect as string
-
-if (sessionExpiredMessage) {
-  messageStore.updateMessage(sessionExpiredMessage)
-  setTimeout(() => {
-    messageStore.restMessage()
-  }, 5000)
-}
 
 const validationSchema = yup.object({
   email: yup.string().required('The email is required'),
@@ -42,12 +30,7 @@ const onSubmit = handleSubmit((values) => {
   authStore
     .login(values.email, values.password)
     .then(() => {
-      // Start automatic token refresh
-      TokenRefreshService.startAutoRefresh()
-      
-      // Redirect back to where user was, or default to event list
-      const destination = redirectPath || '/'
-      router.push(destination)
+      router.push({ name: 'event-list-view' })
     })
     .catch(() => {
       messageStore.updateMessage('Could not login')

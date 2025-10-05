@@ -42,15 +42,15 @@ const convertMediaToString = (media: MediaFile[]): string[] => {
     
     console.log('Processing image URL:', imageUrl)
     
-    // CRITICAL FIX: Skip blob URLs - they're temporary preview URLs that don't persist
+    // Include ALL URLs - blob URLs are needed for preview, Firebase URLs for persistence
+    // The vue-media-upload component:
+    // 1. First creates blob URLs for preview (local, temporary)
+    // 2. Then uploads to backend which returns Firebase URLs
+    // 3. Finally updates with Firebase URLs (permanent)
     if (imageUrl && imageUrl.startsWith('blob:')) {
-      console.warn('⚠️ Skipping blob URL (temporary):', imageUrl)
-      console.log('ℹ️ Upload should complete and provide Firebase URL')
-      return // Don't add blob URLs to the output
-    }
-    
-    // Only add real HTTP/HTTPS URLs (Firebase URLs from backend)
-    if (imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
+      console.log('✅ Adding blob URL for preview:', imageUrl)
+      output.push(imageUrl)
+    } else if (imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
       console.log('✅ Adding permanent Firebase URL:', imageUrl)
       output.push(imageUrl)
     } else if (imageUrl) {
