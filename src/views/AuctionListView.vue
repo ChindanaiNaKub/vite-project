@@ -1,11 +1,35 @@
 <template>
 	<div class="p-4 max-w-5xl mx-auto">
-		<h1 class="text-2xl font-bold mb-4">Auction Items</h1>
-	    <div class="mb-4">
-	      <BaseInput v-model="keyword" label="Smart Search" placeholder="Type to search description or type..." />
-	      <p class="text-xs text-gray-500 mt-1">Matches in description OR type. Debounced 300ms.</p>
+		<div class="flex justify-between items-center mb-6">
+			<h1 class="text-2xl font-bold">Auction Items</h1>
+			<router-link 
+				:to="{ name: 'add-auction' }"
+				class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition font-medium"
+			>
+				+ Create Auction
+			</router-link>
+		</div>
+	    
+	    <!-- Search Filters -->
+	    <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+	      <div>
+	        <BaseInput 
+	          v-model="searchDescription" 
+	          label="Search by Description" 
+	          placeholder="Type to search description..." 
+	        />
+	      </div>
+	      <div>
+	        <BaseInput 
+	          v-model="searchType" 
+	          label="Search by Type/Category" 
+	          placeholder="Type to search category..." 
+	        />
+	      </div>
 	    </div>
-	    <div class="mb-2 text-sm text-gray-600">Showing {{ filteredItems.length }} of {{ totalCount }} total</div>
+	    <p class="text-xs text-gray-500 mb-4">Search matches in description OR type. Debounced 300ms for better performance.</p>
+	    
+	    <div class="mb-2 text-sm text-gray-600">Showing {{ filteredItems.length }} of {{ totalCount }} total auction items</div>
 	    <div v-if="loading" class="text-gray-500">Loading...</div>
 	    <div v-else class="flex flex-wrap gap-4">
 	      <AuctionItemCard v-for="a in pagedItems" :key="a.id" :item="a" />
@@ -29,37 +53,50 @@ import type { AuctionItem, AuctionItemRaw } from '@/type/AuctionItem'
 const route = useRoute()
 const router = useRouter()
 
-// Smart search keyword
-const keyword = ref('')
+// Search filters
+const searchDescription = ref('')
+const searchType = ref('')
+
 // Reactive state
 const items = ref<AuctionItem[]>([])
 const allItems = ref<AuctionItem[]>([]) // Store all items for search
 const totalCount = ref(0)
-const perPage = ref(3) // base page size for pagination when not filtering
+const perPage = ref(6) // base page size for pagination when not filtering (as per backend spec)
 const loading = ref(false)
 
 const page = ref(Number(route.query.page) || 1)
 
 // Filter logic (client side) after initial fetch
-const lowerKeyword = computed(() => keyword.value.trim().toLowerCase())
+const hasActiveSearch = computed(() => 
+	searchDescription.value.trim() !== '' || searchType.value.trim() !== ''
+)
+
 const filteredItems = computed(() => {
-	if (!lowerKeyword.value) return items.value
+	if (!hasActiveSearch.value) return items.value
+	
+	const descLower = searchDescription.value.trim().toLowerCase()
+	const typeLower = searchType.value.trim().toLowerCase()
+	
 	// When searching, filter from all items across all pages
-	return allItems.value.filter(it =>
-		it.description.toLowerCase().includes(lowerKeyword.value) ||
-		it.type.toLowerCase().includes(lowerKeyword.value)
-	)
+	return allItems.value.filter(it => {
+		const matchesDesc = !descLower || it.description.toLowerCase().includes(descLower)
+		const matchesType = !typeLower || it.type.toLowerCase().includes(typeLower)
+		// Both conditions must be satisfied (AND logic)
+		// If description search is filled, description must match
+		// If type search is filled, type must match
+		return matchesDesc && matchesType
+	})
 })
 
 // When filtering, we show all matches (no server pagination). Otherwise, paginate original list.
-const showPagination = computed(() => !lowerKeyword.value && totalPages.value > 1)
+const showPagination = computed(() => !hasActiveSearch.value && totalPages.value > 1)
 const totalPages = computed(() => {
-	if (lowerKeyword.value) return 1
+	if (hasActiveSearch.value) return 1
 	return Math.max(1, Math.ceil(totalCount.value / perPage.value))
 })
 
 const pagedItems = computed(() => {
-	if (lowerKeyword.value) return filteredItems.value
+	if (hasActiveSearch.value) return filteredItems.value
 	// When not filtering, show the current page items from server (not sliced client-side)
 	return filteredItems.value
 })
@@ -137,7 +174,7 @@ function fetchItems() {
 }
 
 function changePage(newPage: number) {
-	if (lowerKeyword.value) return // ignore pagination when filtering
+	if (hasActiveSearch.value) return // ignore pagination when filtering
 	if (newPage < 1 || newPage > totalPages.value) return
 	page.value = newPage
 	router.replace({ query: { ...route.query, page: page.value } })
@@ -146,10 +183,12 @@ function changePage(newPage: number) {
 
 // Debounce smart search (fetch all items when searching)
 let debounceHandle: number | undefined
-watch(keyword, () => {
+
+// Watch both search fields
+watch([searchDescription, searchType], () => {
 	if (debounceHandle) window.clearTimeout(debounceHandle)
 	debounceHandle = window.setTimeout(async () => {
-		if (keyword.value.trim()) {
+		if (hasActiveSearch.value) {
 			// User is searching - fetch all items if we haven't already
 			if (allItems.value.length === 0) {
 				await fetchAllItems()

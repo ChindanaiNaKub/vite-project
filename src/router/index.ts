@@ -15,6 +15,7 @@ import OrganizationFormView from '@/views/OrganizationFormView.vue'
 import OrganizationListView from '@/views/OrganizationListView.vue'
 import AuctionListView from '@/views/AuctionListView.vue'
 import AuctionFormView from '@/views/AuctionFormView.vue'
+import AuctionDetailView from '@/views/AuctionDetailView.vue'
 import OrganizationDetailView from '@/views/OrganizationDetailView.vue'
 import LoginView from '@/views/LoginView.vue'
 import RegisterView from '@/views/RegisterView.vue'
@@ -40,6 +41,12 @@ const router = createRouter({
       path: '/auctions',
       name: 'auction-list',
       component: AuctionListView
+    },
+    {
+      path: '/auction/:id',
+      name: 'auction-detail',
+      component: AuctionDetailView,
+      props: true
     },
     {
       path: '/add-auction',

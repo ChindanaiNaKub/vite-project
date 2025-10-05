@@ -12,6 +12,9 @@ export default {
 	getAuctionItems(perPage: number, page: number): Promise<AxiosResponse<AuctionItem[]>> {
 		return apiClient.get<AuctionItem[]>(`/auction-items?_limit=${perPage}&_page=${page}`)
 	},
+	getAuctionItemById(id: number): Promise<AxiosResponse<AuctionItem>> {
+		return apiClient.get<AuctionItem>(`/auction-items/${id}`)
+	},
 	getAuctionItemsByDescription(description: string, perPage: number, page: number): Promise<AxiosResponse<AuctionItem[]>> {
 		return apiClient.get<AuctionItem[]>(`/auction-items?description=${encodeURIComponent(description)}&_limit=${perPage}&_page=${page}`)
 	},
